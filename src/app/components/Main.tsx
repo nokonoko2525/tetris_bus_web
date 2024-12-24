@@ -188,13 +188,13 @@ export default function Main() {
 
 	// ブロックを描画するための関数
 	const renderGrid = () => {
-		const grid: number[][] = Array.from({ length: 20 }, () => Array(10).fill("white"));
+		const grid: string[][] = Array.from({ length: 20 }, () => Array(10).fill("white"));
 
 		//固定させたブロックを反映させている
 		fixedBlocks.forEach((row, rowIndex) => {
 			row.forEach((cell, colIndex) => {
 				if (cell.type !== null) {
-					grid[gridRow][gridCol] = getColorForBlockType(cell.type);
+					grid[rowIndex][colIndex] = getColorForBlockType(cell.type);
 				}
 			});
 		});
@@ -233,7 +233,7 @@ export default function Main() {
 				style={{
 					width: "20px",
 					height: "20px",
-					backgroundColor: cell === 1 ? "blue" : cell === 2 ? "green" : "white",
+					backgroundColor: cell,
 					border: "1px solid gray",
 				}}
 				></div>
