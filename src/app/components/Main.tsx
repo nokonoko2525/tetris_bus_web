@@ -68,8 +68,10 @@ export default function Main() {
 	});
 
 	// 固定されたブロックの状態を管理する2次元配列
-	const [fixedBlocks, setFixedBlocks] = useState<number[][]>(
-		Array.from({ length: 20 }, () => Array(10).fill(0))
+	const [fixedBlocks, setFixedBlocks] = useState<Array<Array<{ type: BlockTypes | null }>>>(
+		Array.from({ length: 20 }, () =>
+			Array.from({ length: 10 }, () => ({ type: null }))
+		)
 	);
 
 	// 矢印キーによるブロック移動を行うための関数
@@ -94,9 +96,11 @@ export default function Main() {
 				if (shape[row][col] === 1) {
 			  		const gridRow = position.row + row;
 			  		const gridCol = position.col + col;
-				if (gridRow >= 20 || fixedBlocks[gridRow]?.[gridCol] === 1) {
+
+					if (gridRow >= 20 || gridCol < 0 || gridCol >= 10 || fixedBlocks[gridRow]?.[gridCol]?.type !== null ) {
 					return true;
-			  	}}
+					}
+				}
 		  	}
 		}
 		return false;
