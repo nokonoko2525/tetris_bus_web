@@ -45,6 +45,20 @@ export default function Main() {
 		],
 	}; // 変数にブロックの形を宣言
 
+	// ミノによっての色の指定をしている
+	const getColorForBlockType = (type: BlockTypes | null): string => {
+		switch (type) {
+			case "I": return "cyan";
+			case "O": return "yellow";
+			case "T": return "purple";
+			case "S": return "green";
+			case "Z": return "red";
+			case "L": return "orange";
+			case "J": return "blue";
+			default: return "white";
+		}
+	};
+
 	// ランダムにブロック選んで、その形状と種類を返す関数
 	const getRandomBlock = (): { shape: BlockShape; type: BlockTypes } => {
 		const blockTypes: BlockTypes[] = ["I","O","T","S","Z","L","J"];
@@ -67,13 +81,6 @@ export default function Main() {
 		};
 	});
 
-	// 固定されたブロックの状態を管理する2次元配列
-	const [fixedBlocks, setFixedBlocks] = useState<Array<Array<{ type: BlockTypes | null }>>>(
-		Array.from({ length: 20 }, () =>
-			Array.from({ length: 10 }, () => ({ type: null }))
-		)
-	);
-
 	// 矢印キーによるブロック移動を行うための関数
 	const handleKeyDown = (e: KeyboardEvent) => {
 	  setCurrentBlock((prev) => {
@@ -86,6 +93,13 @@ export default function Main() {
 		return { ...prev, position: newPosition };
 	  });
 	};
+
+	// 固定されたブロックの状態を管理する2次元配列
+	const [fixedBlocks, setFixedBlocks] = useState<Array<Array<{ type: BlockTypes | null }>>>(
+		Array.from({ length: 20 }, () =>
+			Array.from({ length: 10 }, () => ({ type: null }))
+		)
+	);
 
 	// 衝突判定についての関数
 	const checkCollision = (): boolean => {
@@ -109,7 +123,7 @@ export default function Main() {
     // 固定ブロックに現在のブロックを追加
 	const fixBlock = () => {
 		setFixedBlocks((prev) => {
-		  	const updated = prev.map((row) => [...row]); // 深いコピー
+		  	const updated = prev.map((row) => row.map((cell) => ({ ...cell })));
 	
 		  	currentBlock.shape.forEach((blockRow, rowIndex) => {
 				blockRow.forEach((cell, colIndex) => {
@@ -117,7 +131,7 @@ export default function Main() {
 				    	const gridRow = currentBlock.position.row + rowIndex;
 						const gridCol = currentBlock.position.col + colIndex;
 					if (gridRow < 20 && gridCol >= 0 && gridCol < 10) {
-						updated[gridRow][gridCol] = 1;
+						updated[gridRow][gridCol] = { type: currentBlock.type }
 					}}
 				});
 			});
@@ -136,7 +150,7 @@ export default function Main() {
 	// ライン消去処理
 	const clearLines = () => {
 		setFixedBlocks((prev) => {
-		   	const updated = prev.filter((row) => row.some((cell) => cell === 0));
+		   	const updated = prev.filter((row) => row.some((cell) => cell.type === null));
 		 	const linesCleared = 20 - updated.length;
 		  	const newRows = Array.from({ length: linesCleared }, () => Array(10).fill(0));
 	
@@ -174,13 +188,13 @@ export default function Main() {
 
 	// ブロックを描画するための関数
 	const renderGrid = () => {
-		const grid: number[][] = Array.from({ length: 20 }, () => Array(10).fill(0));
+		const grid: number[][] = Array.from({ length: 20 }, () => Array(10).fill("white"));
 
 		//固定させたブロックを反映させている
 		fixedBlocks.forEach((row, rowIndex) => {
 			row.forEach((cell, colIndex) => {
-				if (cell === 1) {
-					grid[rowIndex][colIndex] = 1;
+				if (cell.type !== null) {
+					grid[gridRow][gridCol] = getColorForBlockType(cell.type);
 				}
 			});
 		});
@@ -192,7 +206,7 @@ export default function Main() {
 					const gridRow = currentBlock.position.row + rowIndex;
 					const gridCol = currentBlock.position.col + colIndex;
 					if (gridRow >= 0 && gridRow < 20 && gridCol >= 0 && gridCol < 10) {
-						grid[gridRow][gridCol] = 2;
+						grid[gridRow][gridCol] = getColorForBlockType(currentBlock.type);
 					}
 				}
 			});
