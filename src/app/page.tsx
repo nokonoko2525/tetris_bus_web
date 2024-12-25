@@ -1,13 +1,11 @@
 'use client'
+import React, { useState, useEffect } from "react";
+import ScoreIncrementer from "./components/Score";
 
-import Main from "./components/Main";
-
-const Home = () => {
-return (
-	<div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-		<Main/>
-	</div>
-);
-};
-
-export default Home;
+export default function gepa() {
+    return (
+    <div>
+        <ScoreIncrementer />
+    </div>
+    );
+}
