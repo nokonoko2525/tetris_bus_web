@@ -104,7 +104,7 @@ export default function Main() {
 		if (e.key === "ArrowLeft") newPosition.col = Math.max(0, newPosition.col - 1); // 左移動
 		if (e.key === "ArrowRight") newPosition.col = Math.min(10 - prev.shape[0].length, newPosition.col + 1); // 右移動
 		if (e.key === "ArrowDown") newPosition.row = Math.min(20 - prev.shape.length, newPosition.row + 1); // 下移動
-		if (e.key === "ArroeUp") {
+		if (e.key === "ArrowUp") {
 			//回転処理
 			const rotatedshape = rotateBlock(prev.shape);
 			const collision = checkCollision(rotatedshape, prev.position);
