@@ -81,16 +81,39 @@ export default function Main() {
 		};
 	});
 
+	// ミノを回転させるための関数
+	const rotateBlock = (block: BlockShape): BlockShape => {
+		// ブロックを90度時計回りに回転
+		const size = block.length;
+		const rotated: BlockShape = Array.from({ length: size }, () => Array(size).fill(0));
+	  
+		for (let row = 0; row < size; row++) {
+		  for (let col = 0; col < size; col++) {
+			rotated[col][size - row - 1] = block[row][col];
+		  }
+		}
+		return rotated;
+	};
+
 	// 矢印キーによるブロック移動を行うための関数
 	const handleKeyDown = (e: KeyboardEvent) => {
 	  setCurrentBlock((prev) => {
 		let newPosition = { ...prev.position };
+		let newShape = prev.shape;
   
 		if (e.key === "ArrowLeft") newPosition.col = Math.max(0, newPosition.col - 1); // 左移動
 		if (e.key === "ArrowRight") newPosition.col = Math.min(10 - prev.shape[0].length, newPosition.col + 1); // 右移動
 		if (e.key === "ArrowDown") newPosition.row = Math.min(20 - prev.shape.length, newPosition.row + 1); // 下移動
-  
-		return { ...prev, position: newPosition };
+		if (e.key === "ArroeUp") {
+			//回転処理
+			const rotatedshape = rotateBlock(prev.shape);
+			const collision = checkCollision(rotatedshape, prev.position);
+
+			if (!collision) {
+				newShape = rotatedshape
+			}
+		}
+		return { ...prev, position: newPosition ,shape: newShape };
 	  });
 	};
 
@@ -102,23 +125,25 @@ export default function Main() {
 	);
 
 	// 衝突判定についての関数
-	const checkCollision = (): boolean => {
-		const { shape, position } = currentBlock;
-	
+	const checkCollision = (shape: BlockShape, position: { row: number; col: number }): boolean => {
 		for (let row = 0; row < shape.length; row++) {
 		    for (let col = 0; col < shape[row].length; col++) {
 				if (shape[row][col] === 1) {
 			  		const gridRow = position.row + row;
-			  		const gridCol = position.col + col;
-
-					if (gridRow >= 20 || gridCol < 0 || gridCol >= 10 || fixedBlocks[gridRow]?.[gridCol]?.type !== null ) {
-					return true;
-					}
-				}
-		  	}
+			    	const gridCol = position.col + col;
+	  
+			    if (
+					gridRow >= 20 ||
+					gridCol < 0 ||
+					gridCol >= 10 ||
+					fixedBlocks[gridRow]?.[gridCol]?.type !== null
+				) {
+				return true;
+			}}
+		  }
 		}
 		return false;
-	  };
+	};
 
     // 固定ブロックに現在のブロックを追加
 	const fixBlock = () => {
@@ -166,7 +191,7 @@ export default function Main() {
 		setCurrentBlock((prev) => {
 			const newPosition = { ...prev.position, row: prev.position.row + 1 };
 
-			if (checkCollision()) {
+			if (checkCollision(prev.shape, newPosition)) {
 				fixBlock();
 				clearLines();
 				return prev; //衝突時はその場で停止
