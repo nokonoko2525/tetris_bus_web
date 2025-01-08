@@ -143,12 +143,15 @@ export default function Main() {
 	  });
 	};
 
-	// 固定されたブロックの状態を管理する2次元配列
-	const [fixedBlocks, setFixedBlocks] = useState<Array<Array<{ type: BlockTypes | null }>>>(
-		Array.from({ length: 20 }, () =>
-			Array.from({ length: 10 }, () => ({ type: null }))
-		)
+	type FixedBlock = { type: BlockTypes | null };
+	type FixedBlocks = FixedBlock[][];
+
+	const initialFixedBlocks = Array.from({ length: 20 }, () =>
+	Array.from({ length: 10 }, () => ({ type: null }))
 	);
+
+	// 固定されたブロックの状態を管理する2次元配列
+	const [fixedBlocks, setFixedBlocks] = useState<FixedBlocks>(initialFixedBlocks);
 
 	// 衝突判定についての関数
 	const checkCollision = (shape: BlockShape, position: { row: number; col: number }): boolean => {
@@ -203,8 +206,10 @@ export default function Main() {
 		setFixedBlocks((prev) => {
 		   	const updated = prev.filter((row) => row.some((cell) => cell.type === null));
 		 	const linesCleared = 20 - updated.length;
-		  	const newRows = Array.from({ length: linesCleared }, () => Array(10).fill(0));
-	
+			const newRows = Array.from({ length: linesCleared }, () => 
+				Array.from({ length: 10 }, () => ({ type: null }))
+		);
+
 		  	return [...newRows, ...updated];
 		});
 	};
