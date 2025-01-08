@@ -14,6 +14,13 @@ export default function ScoreIncrementer() {
     return interval;
   };
 
+   // 下矢印キーでスコアを増加
+   const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowDown" && isGameRunning) {
+      setScore((prev) => prev + 10);
+    }
+  };
+
   useEffect(() => {
     if (!isGameRunning) return;
 
