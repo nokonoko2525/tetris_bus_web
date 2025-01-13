@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from "react";
 
 export default function Main() {
+	const ROWS = 20;
+	const COLS = 10;
+	const BLOCK_SIZE = 30;
 	const [blockPosition, setBlockPosition] = useState({ row: 0, col: 5 }); // ブロックの初期位置
 	const [isGameRunning, setIsGameRunning] = useState(true); // ゲームの実行状態
 
@@ -68,9 +71,9 @@ export default function Main() {
 
 	// ランダムにブロック選んで、その形状と種類を返す関数
 	const getRandomBlock = (): { shape: BlockShape; type: BlockTypes } => {
-		const blockTypes: BlockTypes[] = ["I","O","T","S","Z","L","J"];
-		const randomType = blockTypes[Math.floor(Math.random() * blockTypes.length)];
-		return { shape: BLOCKS[randomType], type: randomType };
+		const types: BlockTypes[] = ["I","O","T","S","Z","L","J"];
+		const type = types[Math.floor(Math.random() * types.length)];
+		return { shape: BLOCKS[type], type };
 	}
 
 	type CurrentBlock = {
