@@ -165,9 +165,8 @@ export default function Main() {
 					gridRow >= 20 || // 下幅に達した
 					gridCol < 0 || // 左幅を越えた
 					gridCol >= 10 || // 右端を越えた
-					(gridRow >= 0 && fixedBlocks[gridRow]?.[gridCol]?.type !== null) // 固定ブロックとの衝突
+					fixedBlocks[gridRow]?.[gridCol]?.type !== null // 固定ブロックとの衝突
 				) {
-				console.log(`Collision datected at (${gridRow}, ${gridCol})`);
 				return true;
 			}}
 		  }
@@ -190,8 +189,10 @@ export default function Main() {
 					}}
 				});
 			});
-			console.log("デバック" , updated);
-			return updated;
+			// ライン消去処理をここで呼び出す
+			const cleared = clearLines(updated);
+
+			return cleared;
 		});
 
 		// 次のブロックを生成する
