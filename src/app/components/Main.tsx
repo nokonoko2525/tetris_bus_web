@@ -15,33 +15,40 @@ export default function Main() {
 			[0,0,0,0],
 		],
 		O:[
-			[1,1],
-			[1,1],
+			[0,0,0,0],
+			[0,1,1,0],
+			[0,1,1,0],
+			[0,0,0,0],
 		],
 		T:[
-			[0,1,0],
-			[1,1,1],
-			[0,0,0],
+			[0,0,0,0],
+			[0,1,0,0],
+			[1,1,1,0],
+			[0,0,0,0],
 		],
 		S:[
-			[0,1,1],
-			[1,1,0],
-			[0,0,0],
+			[0,0,0,0],
+			[0,1,1,0],
+			[1,1,0,0],
+			[0,0,0,0],
 		],
 		Z:[
-			[1,1,0],
-			[0,1,1],
-			[0,0,0],
+			[0,0,0,0],
+			[1,1,0,0],
+			[0,1,1,0],
+			[0,0,0,0],
 		],
 		L:[
-			[1,0,0],
-			[1,1,1],
-			[0,0,0],
+			[0,0,0,0],
+			[1,0,0,0],
+			[1,1,1,0],
+			[0,0,0,0],
 		],
 		J:[
-			[0,0,1],
-			[1,1,1],
-			[0,0,0],
+			[0,0,0,0],
+			[0,0,1,0],
+			[1,1,1,0],
+			[0,0,0,0],
 		],
 	}; // 変数にブロックの形を宣言
 
@@ -100,16 +107,35 @@ export default function Main() {
 	  setCurrentBlock((prev) => {
 		let newPosition = { ...prev.position };
 		let newShape = prev.shape;
-  
-		if (e.key === "ArrowLeft") newPosition.col = Math.max(0, newPosition.col - 1); // 左移動
-		if (e.key === "ArrowRight") newPosition.col = Math.min(10 - prev.shape[0].length, newPosition.col + 1); // 右移動
-		if (e.key === "ArrowDown") newPosition.row = Math.min(20 - prev.shape.length, newPosition.row + 1); // 下移動
-		if (e.key === "ArroeUp") {
-			//回転処理
-			const rotatedshape = rotateBlock(prev.shape);
-			const collision = checkCollision(rotatedshape, prev.position);
+		
+		// 左移動
+		if (e.key === "ArrowLeft") {
+			const testPosition = { ...newPosition, col: newPosition.col - 1 };
+			if ( !checkCollision(prev.shape, testPosition)) {
+				newPosition = testPosition;
+			}
+		}
 
-			if (!collision) {
+		// 右移動
+		if (e.key === "ArrowRight") {
+			const testPosition = { ...newPosition, col: newPosition.col + 1 };
+			if (!checkCollision(prev.shape, testPosition)) {
+				newPosition = testPosition;
+			}
+		}
+
+		// 下移動
+		if (e.key === "ArrowDown") {
+			const testPosition = { ...newPosition, row: newPosition.row + 1 };
+			if (!checkCollision(prev.shape, testPosition)) {
+				newPosition = testPosition;
+			}
+		}
+		
+		// 回転
+		if (e.key === "ArrowUp") {
+			const rotatedshape = rotateBlock(prev.shape);
+			if (!checkCollision(rotatedshape, prev.position)) {
 				newShape = rotatedshape
 			}
 		}
@@ -117,12 +143,15 @@ export default function Main() {
 	  });
 	};
 
-	// 固定されたブロックの状態を管理する2次元配列
-	const [fixedBlocks, setFixedBlocks] = useState<Array<Array<{ type: BlockTypes | null }>>>(
-		Array.from({ length: 20 }, () =>
-			Array.from({ length: 10 }, () => ({ type: null }))
-		)
+	type FixedBlock = { type: BlockTypes | null };
+	type FixedBlocks = FixedBlock[][];
+
+	const initialFixedBlocks = Array.from({ length: 20 }, () =>
+	Array.from({ length: 10 }, () => ({ type: null }))
 	);
+
+	// 固定されたブロックの状態を管理する2次元配列
+	const [fixedBlocks, setFixedBlocks] = useState<FixedBlocks>(initialFixedBlocks);
 
 	// 衝突判定についての関数
 	const checkCollision = (shape: BlockShape, position: { row: number; col: number }): boolean => {
@@ -132,11 +161,11 @@ export default function Main() {
 			  		const gridRow = position.row + row;
 			    	const gridCol = position.col + col;
 	  
-			    if (
-					gridRow >= 20 ||
-					gridCol < 0 ||
-					gridCol >= 10 ||
-					fixedBlocks[gridRow]?.[gridCol]?.type !== null
+			    if (// ゲームの範囲外または固定されたブロックとの衝突判定
+					gridRow >= 20 || // 下幅に達した
+					gridCol < 0 || // 左幅を越えた
+					gridCol >= 10 || // 右端を越えた
+					fixedBlocks[gridRow]?.[gridCol]?.type !== null // 固定ブロックとの衝突
 				) {
 				return true;
 			}}
@@ -160,7 +189,10 @@ export default function Main() {
 					}}
 				});
 			});
-			return updated;
+			// ライン消去処理をここで呼び出す
+			const cleared = clearLines(updated);
+
+			return cleared;
 		});
 
 		// 次のブロックを生成する
@@ -173,14 +205,14 @@ export default function Main() {
 	};
 
 	// ライン消去処理
-	const clearLines = () => {
-		setFixedBlocks((prev) => {
-		   	const updated = prev.filter((row) => row.some((cell) => cell.type === null));
+	const clearLines = (blocks: FixedBlocks): FixedBlocks => {
+		   	const updated = blocks.filter((row) => row.some((cell) => cell.type === null));
 		 	const linesCleared = 20 - updated.length;
-		  	const newRows = Array.from({ length: linesCleared }, () => Array(10).fill(0));
-	
+			const newRows = Array.from({ length: linesCleared }, () => 
+				Array.from({ length: 10 }, () => ({ type: null }))
+		);
+
 		  	return [...newRows, ...updated];
-		});
 	};
 
 	// ミノが自然に落下するようにするための処理
@@ -193,7 +225,6 @@ export default function Main() {
 
 			if (checkCollision(prev.shape, newPosition)) {
 				fixBlock();
-				clearLines();
 				return prev; //衝突時はその場で停止
 			}
 
