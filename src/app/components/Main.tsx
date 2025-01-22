@@ -189,7 +189,10 @@ export default function Main() {
 					}}
 				});
 			});
-			return updated;
+			// ライン消去処理をここで呼び出す
+			const cleared = clearLines(updated);
+
+			return cleared;
 		});
 
 		// 次のブロックを生成する
@@ -202,16 +205,14 @@ export default function Main() {
 	};
 
 	// ライン消去処理
-	const clearLines = () => {
-		setFixedBlocks((prev) => {
-		   	const updated = prev.filter((row) => row.some((cell) => cell.type === null));
+	const clearLines = (blocks: FixedBlocks): FixedBlocks => {
+		   	const updated = blocks.filter((row) => row.some((cell) => cell.type === null));
 		 	const linesCleared = 20 - updated.length;
 			const newRows = Array.from({ length: linesCleared }, () => 
 				Array.from({ length: 10 }, () => ({ type: null }))
 		);
 
 		  	return [...newRows, ...updated];
-		});
 	};
 
 	// ミノが自然に落下するようにするための処理
@@ -224,7 +225,6 @@ export default function Main() {
 
 			if (checkCollision(prev.shape, newPosition)) {
 				fixBlock();
-				clearLines();
 				return prev; //衝突時はその場で停止
 			}
 
